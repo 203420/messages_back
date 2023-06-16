@@ -11,3 +11,4 @@ class userModel(models.Model):
     firebaseId = models.TextField(null=False)
     contacts = models.TextField(null=False)
     
+    
