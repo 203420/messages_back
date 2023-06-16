@@ -3,10 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 import json 
 
-from user.models import userModel
-from user.serializers import usersSerializerAll, usersSerializerProfiles, contactsSerializer
+from users_new.models import userModel
+from users_new.serializers import usersSerializerAll, usersSerializerProfiles, contactsSerializer
 
-# Create your views here.
 class UsersView(APIView):
     def post(self, request, format=None):
         serializer = usersSerializerAll(data = request.data)
@@ -44,6 +43,7 @@ class UsersView(APIView):
             return Response("Usuarios eliminados", status=status.HTTP_200_OK)
         except:
             return Response("Error", status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 class SingleUserView(APIView):
@@ -60,7 +60,6 @@ class SingleUserView(APIView):
             return Response(id_response.data, status=status.HTTP_200_OK)
         return Response("No hay datos", status=status.HTTP_400_BAD_REQUEST)
     
-    
 class ContactsView(APIView):
     def get_object(self, pk):
         try:
@@ -72,18 +71,17 @@ class ContactsView(APIView):
         email = request.data.get('email', None)
         user = self.get_object(pk)
         if user != 0:
-            current_contacts = user.contacts
-            new_contact = email
-            
-            # Agrega el nuevo correo electrónico solo si no está presente en la lista actual
-            if new_contact and new_contact not in current_contacts:
-                new_contacts = current_contacts + new_contact + ","
-                user.contacts = new_contacts
-                user.save()
-            
-            return Response(status=status.HTTP_200_OK)
+            new_contact = userModel.objects.get(email=email)
+
+            if new_contact is not None:
+                current_contacts = user.contacts.all()
+
+                if new_contact not in current_contacts:
+                    user.contacts.add(new_contact)
+                    return Response(status=status.HTTP_200_OK)
         
         return Response(status=status.HTTP_400_BAD_REQUEST)
+    
 
 class ContactsViewList(APIView):
     def get_object(self, pk):
@@ -95,14 +93,12 @@ class ContactsViewList(APIView):
     def get(self, request, pk, format=None):
         id_response = self.get_object(pk)
         if id_response != 0:
-            id_response = contactsSerializer(id_response)
-            data = str(id_response.data['contacts']).split(",")[:-1]
-
-            instances = userModel.objects.filter(email__in=data)
-            if instances:
-                serializer = usersSerializerProfiles(instances, many=True)
-                response = {
-                    'contacts': serializer.data
-                }
-                return Response(response, status=status.HTTP_200_OK)
+            contacts = id_response.contacts.all()
+            serializer = usersSerializerProfiles(contacts, many=True)
+        
+            response = {
+                'contacts': serializer.data
+            }
+            print (response)
+            return Response(response, status=status.HTTP_200_OK)
         return Response("No hay datos", status=status.HTTP_400_BAD_REQUEST)

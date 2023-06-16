@@ -9,6 +9,4 @@ class userModel(models.Model):
     img = models.ImageField(upload_to="profile", null=False)
     isLoged = models.TextField(default="False", null=False)
     firebaseId = models.TextField(null=False)
-    contacts = models.TextField(null=False)
-    
-    
+    contacts = models.ManyToManyField('self', blank=True)

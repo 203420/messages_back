@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from django.conf.urls import include
 
-from user.views import UsersView, SingleUserView, ContactsView, ContactsViewList
+from users_new.views import UsersView, SingleUserView, ContactsView, ContactsViewList
 
 urlpatterns = [
     re_path(r'^db/$', UsersView.as_view()),
