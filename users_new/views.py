@@ -44,6 +44,8 @@ class UsersView(APIView):
         except:
             return Response("Error", status=status.HTTP_400_BAD_REQUEST)
         
+    
+        
 
 
 class SingleUserView(APIView):
@@ -59,6 +61,15 @@ class SingleUserView(APIView):
             id_response = usersSerializerProfiles(id_response)
             return Response(id_response.data, status=status.HTTP_200_OK)
         return Response("No hay datos", status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, pk, format=None):
+        user = self.get_object(pk)
+        if user  != 0:
+            serializer = usersSerializerProfiles(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class ContactsView(APIView):
     def get_object(self, pk):
@@ -99,6 +110,5 @@ class ContactsViewList(APIView):
             response = {
                 'contacts': serializer.data
             }
-            print (response)
             return Response(response, status=status.HTTP_200_OK)
         return Response("No hay datos", status=status.HTTP_400_BAD_REQUEST)
