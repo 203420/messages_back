@@ -112,3 +112,33 @@ class ContactsViewList(APIView):
             }
             return Response(response, status=status.HTTP_200_OK)
         return Response("No hay datos", status=status.HTTP_400_BAD_REQUEST)
+
+class UsersFirebaseView(APIView):
+    # def get_object(self, firebaseId):
+    #     try:
+    #         return userModel.objects.get(firebaseId = firebaseId)
+    #     except userModel.DoesNotExist:
+    #         return 0
+
+    # def get(self, request, pk, format=None):
+    #     id_response = self.get_object(pk)
+    #     if id_response != 0:
+    #         id_response = usersSerializerProfiles(id_response)
+    #         return Response(id_response.data, status=status.HTTP_200_OK)
+    #     return Response("No hay datos", status=status.HTTP_400_BAD_REQUEST)
+    
+    def get_object(self, firebaseId):
+        try:
+            return userModel.objects.get(firebaseId=firebaseId)
+        except userModel.DoesNotExist:
+            return None
+
+    def get(self, request, format=None):
+        fid = request.data.get('firebaseId', None)
+        print(fid)
+        if fid:
+            instance = self.get_object(fid)
+            instance = usersSerializerProfiles(instance)
+            if instance:
+                return Response(instance.data, status=status.HTTP_200_OK)
+        return Response("No hay datos", status=status.HTTP_200_OK)
